@@ -3,16 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cabinet Door Calculator</title>
+    <title>Shaker Door Calculator</title>
     <script>
+        function nearestFraction(decimal) {
+            const allowedDenominators = [1, 2, 4, 8, 16];
+            let bestNumerator = 0;
+            let bestDenominator = 1;
+            let minDifference = Infinity;
+
+            for (let denominator of allowedDenominators) {
+                let numerator = Math.round(decimal * denominator);
+                let fraction = numerator / denominator;
+                let difference = Math.abs(fraction - decimal);
+
+                if (difference < minDifference) {
+                    bestNumerator = numerator;
+                    bestDenominator = denominator;
+                    minDifference = difference;
+                }
+            }
+
+            let wholeNumber = Math.floor(bestNumerator / bestDenominator);
+            let remainder = bestNumerator % bestDenominator;
+            
+            if (remainder === 0) {
+                return `${wholeNumber}`; // Return whole number if no remainder
+            }
+            if (wholeNumber === 0) {
+                return `${remainder}/${bestDenominator}`; // Return fraction only if no whole number part
+            }
+            return `${wholeNumber} ${remainder}/${bestDenominator}`; // Return mixed number
+        }
+
+        function showWork() {
+            // Output calculations
+            document.getElementById('calculations').style.display = 'block';
+        }
+        
         function calculateCutList() {
             // Get input values
             const numDoors = parseInt(document.getElementById('numDoors').value);
             const openingWidth = parseFloat(document.getElementById('openingWidth').value);
             const openingHeight = parseFloat(document.getElementById('openingHeight').value);
-            const stileWidth = parseFloat(document.getElementById('stileWidth').value);
+            const stileRailWidth = parseFloat(document.getElementById('stileRailWidth').value);
             const overlay = parseFloat(document.getElementById('overlay').value);
             const gap = numDoors > 1 ? parseFloat(document.getElementById('gap').value) : 0;
+            const stileRailThickness = parseFloat(document.getElementById('stileRailThickness').value);
+            const panelThickness = parseFloat(document.getElementById('panelThickness').value);
+
 
             // Compute final door dimensions
             const totalWidth = openingWidth + 2 * overlay;
@@ -23,29 +61,100 @@
             const stileHeight = doorHeight;
 
             // Rail dimensions
-            const railLength = doorWidth - 2 * stileWidth + 0.75; // Adding tenon length
+            const railLength = doorWidth - 2 * stileRailWidth + 0.75; // Adding tenon length
 
             // Panel dimensions (accounting for groove depth)
             const grooveDepth = 0.375; // 3/8"
-            const panelWidth = doorWidth - 2 * grooveDepth;
-            const panelHeight = doorHeight - 2 * grooveDepth - 2 * stileWidth;
+            const panelWidth = doorWidth + 2 * grooveDepth - 2 * stileRailWidth;
+            const panelHeight = doorHeight + 2 * grooveDepth - 2 * stileRailWidth;
 
             // Output results
-            document.getElementById('results').innerHTML = `
-                <h3>Cut List</h3>
-                <p><strong>Stiles:</strong> ${numDoors * 2} pieces, ${stileWidth}" x ${stileHeight}"</p>
-                <p><strong>Rails:</strong> ${numDoors * 2} pieces, ${stileWidth}" x ${railLength}"</p>
-                <p><strong>Panels:</strong> ${numDoors} pieces, ${panelWidth}" x ${panelHeight}"</p>
-                <h3>Procedure</h3>
-                <ol>
-                    <li>Cut stiles and rails to the given dimensions.</li>
-                    <li>Cut grooves (1/4" wide, 3/8" deep) along the inner edges of all stiles and rails.</li>
-                    <li>Cut tenons (1/4" thick, 3/8" long) on each rail end.</li>
-                    <li>Dry fit the frame and panel to ensure a snug fit.</li>
-                    <li>Assemble with glue, ensuring the panel is free to expand.</li>
-                    <li>Clamp, check for squareness, and let dry.</li>
-                    <li>Sand, finish, and install.</li>
+            document.getElementById('cutlist').innerHTML = `
+                <h2 class="text-2xl font-bold">Cut List</h2>
+                <p><strong>Stiles:</strong> ${numDoors * 2} pieces, ${nearestFraction(stileRailWidth)}" x ${nearestFraction(stileHeight)}"</p>
+                <p><strong>Rails:</strong> ${numDoors * 2} pieces, ${nearestFraction(stileRailWidth)}" x ${nearestFraction(railLength)}"</p>
+                <p><strong>Panels:</strong> ${numDoors} pieces, ${nearestFraction(panelWidth)}" x ${nearestFraction(panelHeight)}"</p>
+                <h2 class="text-2xl font-bold">Procedures</h2>
+                <h3 class="text-xl font-bold">Step 1: Cut Materials</h3>
+                <ol class="list-disc list-inside">
+                    <li>Cut <strong>${numDoors * 2} stiles</strong> to <strong>${nearestFraction(stileRailWidth)}" x ${nearestFraction(stileHeight)}"</strong> from ${nearestFraction(stileRailThickness)} material.</li>
+                    <li>Cut <strong>${numDoors * 2} rails</strong> to <strong>${nearestFraction(stileRailWidth)}" x ${nearestFraction(railLength)}"</strong> from ${nearestFraction(stileRailThickness)} material.</li>
+                    <li>Cut <strong>${numDoors} panels</strong> to <strong>${nearestFraction(panelWidth)}" x ${nearestFraction(panelHeight)}"</strong> from ${nearestFraction(panelThickness)} material.</li>
                 </ol>
+                <h3 class="text-xl font-bold">Step 2: Cut the Joinery</h3>
+                <h4 class="font-bold">Grooves for the Panel</h4>
+                <ol class="list-disc list-inside">
+                    <li>Use a <strong>router with a ${nearestFraction(panelThickness)}" slot cutter</strong> or a <strong>table saw with a dado blade</strong> to cut a <strong>${nearestFraction(panelThickness)}" wide groove, 3/8" deep</strong>, along the inside edges of all stiles and rails.</li>
+                    <li>The panel will slide into this groove.</li>
+                </ol>
+                <h4 class="font-bold">Tenons on the Rails</h4>
+                <ol class="list-disc list-inside">
+                    <li>On the <strong>rails</strong>, cut a <strong>tenon (tongue) ${nearestFraction(panelThickness)}" thick and 3/8" long</strong> on each end to fit into the grooves of the stiles.</li>
+                    <li>You can do this using a table saw with a dado blade or a router.</li>
+                </ol>
+                <h3 class="text-xl font-bold">Step 3: Dry Fit the Frame</h3>
+                <ol class="list-disc list-inside">
+                    <li>Test fit the <strong>stiles, railes, and panel</strong> to ensure a snug fit.</li>
+                    <li>The panel should fit into the grooves without forcing.</li>
+                </ol>
+                <h3 class="text-xl font-bold">Step 4: Assemble the Door</h3>
+                <ol class="list-decimal list-inside">
+                    <li>Apply glue to the <strong>tenons of the rails</strong> (avoid getting glue in the panel grooves so the panel can expand/contract).</li>
+                    <li>Insert the <strong>panel</strong> into the grooves.</li>
+                    <li>Clamp the frame together and <strong>ensure the door is square</strong> by measuring diagonally.</li>
+                    <li>Let the glue dry for at least <strong>30 minutes to an hour</strong>.</li>
+                </ol>
+                <h3 class="text-xl font-bold">Step 5: Sand and Finish</h3>
+                <ol class="list-disc list-inside">
+                    <li>Sand the assembled doors smooth.</li>
+                    <li>Slightly round over or chamfer the edges for a softer look.</li>
+                    <li>Apply primer and paint or stain and seal.</li>
+                </ol>
+                <button onclick="showWork()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Show Calculations</button>
+            `;
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('cutlist').style.display = 'block';
+
+            document.getElementById('calculations').innerHTML= `
+                <br>
+                <h2 class="text-2xl font-bold">Calculations</h2>
+                <br>
+                <p>Each door will have a ${nearestFraction(overlay)}" overlay on all outer edges and a ${nearestFraction(gap)}" gap between them.</p>
+                <br>
+                <h3 class="text-xl font-bold">Final Door Dimensions:</h3>
+                <p><strong>Total width of both doors: </strong>( ${nearestFraction(openingWidth)}" + ${nearestFraction(overlay)}" + ${nearestFraction(overlay)}" = ${nearestFraction(totalWidth)}" )</p>
+                <p><strong>Each door width: </strong>( (${nearestFraction(totalWidth)}" - ${nearestFraction(gap)}") / ${numDoors} = ${nearestFraction(doorWidth)}" )</p>
+                <p><strong>Each door height: </strong>( ${nearestFraction(openingHeight)}" + ${nearestFraction(overlay)}" + ${nearestFraction(overlay)}" = ${nearestFraction(doorHeight)}" )</p>
+                <br>
+                <p>--------------------------------------------------------------------------------</p>
+                <br>
+                <h3 class="text-xl font-bold">Stiles (Vertical Pieces) - ${numDoors * 2} Pieces</h3>
+                <p><strong>Width: </strong>${nearestFraction(stileRailWidth)}"</p>
+                <p><strong>Length: </strong>${nearestFraction(stileHeight)}"</p>
+                <br>
+                <h3 class="text-xl font-bold">Rails (Horizontal Pieces) - ${numDoors * 2} Pieces</h3>
+                <p><strong>Width: </strong>${nearestFraction(stileRailWidth)}"</p>
+                <p><strong>Length: </strong>${nearestFraction(railLength)}"</p>
+                <br>
+                <p><strong>Final Rail Length Calculation:</strong></p>
+                <p><strong>Frame opening for the panel: </strong>( ${nearestFraction(doorWidth)}" - (2 × ${nearestFraction(stileRailWidth)}") = ${nearestFraction(doorWidth - 2 * stileRailWidth)}" )</p>
+                <p>Each tenon extends 3/8" per end, so we add 3/4" to the rail length:</p>
+                <p><strong>Final rail length: </strong>${nearestFraction(railLength)}"</p>
+                <br>
+                <h3 class="text-xl font-bold">Panels (Plywood) - ${numDoors} Pieces</h3>
+                <p><strong>Width: </strong>${nearestFraction(panelWidth)}"</p>
+                <p><strong>Height: </strong>${nearestFraction(panelHeight)}"</p>
+                <br>
+                <p><strong>Width Calculation:</strong></p>
+                <p>The panel fits into a ${nearestFraction(panelThickness)}" wide x 3/8" deep groove on each stile.</p>
+                <p>The visible opening for the panel is ( ${nearestFraction(doorWidth - 2 * stileRailWidth)}" ).</p>
+                <p>The panel extends 3/8" into each stile’s groove.</p>
+                <p><strong>Final panel width: </strong>( ${nearestFraction(doorWidth - 2 * stileRailWidth)}" + (2 × 3/8") = ${nearestFraction(panelWidth)}" ).</p>
+                <br>
+                <p><strong>Height Calculation:</strong></p>
+                <p>The visible opening for the panel is ( ${nearestFraction(doorHeight)}" - (2 × ${nearestFraction(stileRailWidth)}") = ${nearestFraction(doorHeight - 2 * stileRailWidth)}" ).</p>
+                <p>The panel extends 3/8" into each rail’s groove.</p>
+                <p><strong>Final panel height: </strong>( ${nearestFraction(doorHeight - 2 * stileRailWidth)}" + (2 × 3/8") = ${nearestFraction(panelHeight)}" ).</p>
             `;
         }
     </script>
@@ -53,17 +162,22 @@
 </head>
 <body class="bg-gray-100 p-6">
     <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold mb-4">Cabinet Door Calculator</h2>
+        <h1 class="text-4xl font-extrabold">Shaker Door Calculator</h1>
         <div class="space-y-2">
-            <label>Number of Doors: <input type="number" id="numDoors" class="border p-2 w-full" value="2"></label>
-            <label>Opening Width (inches): <input type="number" id="openingWidth" class="border p-2 w-full" value="43.375"></label>
-            <label>Opening Height (inches): <input type="number" id="openingHeight" class="border p-2 w-full" value="27.75"></label>
-            <label>Stile & Rail Width (inches): <input type="number" id="stileWidth" class="border p-2 w-full" value="3"></label>
-            <label>Overlay (inches): <input type="number" id="overlay" class="border p-2 w-full" value="0.75"></label>
-            <label>Gap Between Doors (inches): <input type="number" id="gap" class="border p-2 w-full" value="0.125"></label>
+            <label>Number of Doors: <input type="number" id="numDoors" class="border p-2 w-full" step="1" min="1" value="2"></label>
+            <label>Opening Width (inches): <input type="number" id="openingWidth" class="border p-2 w-full" step="0.125" min="0" value="48"></label>
+            <label>Opening Height (inches): <input type="number" id="openingHeight" class="border p-2 w-full" step="0.125" min="0" value="36"></label>
+            <label>Stile & Rail Width (inches): <input type="number" id="stileRailWidth" class="border p-2 w-full" step="0.25" min="0.75" value="3"></label>
+            <label>Overlay (inches): <input type="number" id="overlay" class="border p-2 w-full" step="0.25" min="0" value="0.75"></label>
+            <label>Gap Between Doors (inches): <input type="number" id="gap" class="border p-2 w-full" step="0.125" min="0" value="0.125"></label>
+            <label>Stile & Rail Thickness (inches): <input type="number" id="stileRailThickness" class="border p-2 w-full" step="0.25" min="0" value="0.75"></label>
+            <label>Panel Thickness (inches): <input type="number" id="panelThickness" class="border p-2 w-full" step="0.25" min="0.25" value="0.25"></label>
         </div>
         <button onclick="calculateCutList()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Calculate</button>
-        <div id="results" class="mt-4 p-4 bg-gray-50 border rounded"></div>
+        <div id="results" class="mt-4 p-4 bg-gray-50 border rounded" style="display: none;">
+            <div id="cutlist" style="display: none;"></div>
+            <div id="calculations" style="display: none;"></div>
+        </div>
     </div>
 </body>
 </html>
