@@ -8,3 +8,5 @@ Super simple calculator that produces a cutlist and high-level procedures for bu
 - Stile & Rail Width
 - Overlay
 - Gap Between Doors
+- Stile & Rail Thickness
+- Panel Thickness
