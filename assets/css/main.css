@@ -1,0 +1,146 @@
+/* Global body styling */
+body {
+  background-color: #f7fafc; /* Tailwind bg-gray-100 */
+  padding: 1.5rem; /* p-6 */
+  font-family: sans-serif;
+  margin: 0;
+}
+
+/* Card container (max-w-2xl, mx-auto, bg-white, p-6, rounded-lg, shadow-md) */
+.card {
+  background-color: #ffffff; /* bg-white */
+  padding: 1.5rem; /* p-6 */
+  border-radius: 0.5rem; /* rounded-lg */
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.stack > * {
+  margin-block: 0;
+}
+
+.stack > * + * {
+  margin-block-start: var(--space, 0.5rem);
+}
+.stack > h2,
+.stack > h3 {
+  margin-block-start: 2rem;
+}
+
+.grid {
+  display: grid;
+  grid-gap: 1rem;
+}
+
+@supports (width: min(42rem, 100%)) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(42rem, 100%), 1fr));
+  }
+}
+
+.switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-sizing: content-box;
+  margin-inline: auto;
+  max-inline-size: var(--measure);
+}
+
+.switcher > * {
+  max-width: 42rem;
+  flex-grow: 1;
+  flex-basis: calc((84rem - 100%) * 999);
+}
+
+.switcher > :nth-last-child(n + 4),
+.switcher > :nth-last-child(n + 4) ~ * {
+  flex-basis: 100%;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.grid > * {
+  width: 33.333%;
+}
+
+@media (max-width: 60rem) {
+  .grid > * {
+    width: 50%;
+  }
+}
+
+@media (max-width: 30rem) {
+  .grid > * {
+    width: 100%;
+  }
+}
+
+/* Title styling (text-4xl, font-extrabold) */
+.title {
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1rem;
+}
+
+/* Form group: spacing between input fields */
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem; /* similar to space-y-2 */
+}
+
+/* Input fields (border, p-2, w-full) */
+.input-field {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.25rem;
+}
+
+/* Button styling (mt-4, bg-blue-500, text-white, px-4, py-2, rounded) */
+.btn {
+  margin-top: 1rem;
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #ffffff; /* text-white */
+  padding: 0.5rem 1rem; /* py-2, px-4 */
+  border: none;
+  border-radius: 0.25rem; /* rounded */
+  cursor: pointer;
+}
+
+/* Headings generated in JS */
+.heading-2xl {
+  font-size: 1.5rem; /* roughly Tailwind text-2xl */
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.heading-xl {
+  font-size: 1.25rem; /* roughly Tailwind text-xl */
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* List styles for generated content */
+.disc-list {
+  list-style-type: disc;
+  list-style-position: inside;
+  margin-left: 1rem;
+}
+
+.decimal-list {
+  list-style-type: decimal;
+  list-style-position: inside;
+  margin-left: 1rem;
+}
