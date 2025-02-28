@@ -276,15 +276,15 @@ function calculateCutList() {
 
   document.getElementById("cutlist").innerHTML = `
       <h2 class="heading-2xl">Cut List</h2>
-      <p><strong>Stiles:</strong> ${newCabinet.numDoors * 2} pieces, ${nearestFraction(newCabinet.stileRailWidth)} x ${nearestFraction(newCabinet.stileHeight)}</p>
-      <p><strong>Rails:</strong> ${newCabinet.numDoors * 2} pieces, ${nearestFraction(stileRailWidth)} x ${nearestFraction(newCabinet.railLength)}</p>
-      <p><strong>Panels:</strong> ${newCabinet.numDoors} pieces, ${nearestFraction(newCabinet.panelWidth)} x ${nearestFraction(newCabinet.panelHeight)}</p>
+      <p><strong>Stiles:</strong> ${newCabinet.numDoors * 2} pieces, ${newCabinet.stileRailWidth} x ${newCabinet.stileHeight}</p>
+      <p><strong>Rails:</strong> ${newCabinet.numDoors * 2} pieces, ${stileRailWidth} x ${newCabinet.railLength}</p>
+      <p><strong>Panels:</strong> ${newCabinet.numDoors} pieces, ${newCabinet.panelWidth} x ${newCabinet.panelHeight}</p>
       <h2 class="heading-2xl">Procedures</h2>
       <h3 class="heading-xl">Step 1: Cut Materials</h3>
       <ol class="disc-list">
-          <li>Cut <strong>${newCabinet.numDoors * 2} stiles</strong> to <strong>${newCabinet.stileRailWidth}" x ${newCabinet.stileHeight}"</strong> from ${newCabinet.stileRailThickness}" material.</li>
-          <li>Cut <strong>${newCabinet.numDoors * 2} rails</strong> to <strong>${newCabinet.stileRailWidth}" x ${newCabinet.railLength}"</strong> from ${newCabinet.stileRailThickness}" material.</li>
-          <li>Cut <strong>${newCabinet.numDoors} panels</strong> to <strong>${newCabinet.panelWidth}" x ${newCabinet.panelHeight}"</strong> from ${newCabinet.panelThickness}" material.</li>
+          <li>Cut <strong>${newCabinet.numDoors * 2} stiles</strong> to <strong>${newCabinet.stileRailWidth} x ${newCabinet.stileHeight}</strong> from ${newCabinet.stileRailThickness} material.</li>
+          <li>Cut <strong>${newCabinet.numDoors * 2} rails</strong> to <strong>${newCabinet.stileRailWidth} x ${newCabinet.railLength}</strong> from ${newCabinet.stileRailThickness} material.</li>
+          <li>Cut <strong>${newCabinet.numDoors} panels</strong> to <strong>${newCabinet.panelWidth} x ${newCabinet.panelHeight}</strong> from ${newCabinet.panelThickness} material.</li>
       </ol>
       <h3 class="heading-xl">Step 2: Cut the Joinery</h3>
       <h4 class="heading-xl">Grooves for the Panel</h4>
@@ -326,7 +326,7 @@ function calculateCutList() {
       <h3 class="heading-xl">Final Door Dimensions:</h3>
       <p><strong>Total width of both doors: </strong>( ${newCabinet.openingWidth} + ${newCabinet.overlay} + ${newCabinet.overlay} = ${newCabinet.totalWidth} )</p>
       <p><strong>Each door width: </strong>( (${newCabinet.totalWidth} - ${newCabinet.gap}) / ${numDoors} = ${newCabinet.doors[0].width} )</p>
-      <p><strong>Each door height: </strong>( ${newCabinet.openingHeight} + ${newCabinet.overlay} + ${newCabinet.overlay}" = ${newCabinet.doors[0].height} )</p>
+      <p><strong>Each door height: </strong>( ${newCabinet.openingHeight} + ${newCabinet.overlay} + ${newCabinet.overlay} = ${newCabinet.doors[0].height} )</p>
       <hr/>
       <h3 class="heading-xl">Stiles (Vertical Pieces) - ${newCabinet.numDoors * 2} Pieces</h3>
       <p><strong>Width: </strong>${newCabinet.stileRailWidth}</p>
