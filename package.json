@@ -2,5 +2,8 @@
   "scripts": {
     "build:eleventy": "cross-env ELEVENTY_ENV=production npx @11ty/eleventy --quiet",
     "build-gh-pages": "npm run build:eleventy -- --pathprefix=/shaker-door-calculator/"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3"
   }
 }
