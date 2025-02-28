@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "scripts": {
     "prebuild": "npm run clean",
     "build:eleventy": "cross-env ELEVENTY_ENV=production npx @11ty/eleventy --quiet",
