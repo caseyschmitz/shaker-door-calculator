@@ -1,0 +1,14 @@
+---
+layout: layouts/base.njk
+---
+<main>
+    <div class="switcher">
+        {{ content | safe }}
+        {% include "partials/form.njk" %}
+        <div id="results" class="card" style="display: none;">
+            <canvas id="canvas">Sorry, can't display the diagram.</canvas>
+            {% include "partials/cutlist.njk" %}
+        </div>
+        {% include "partials/calculations.njk" %}
+    </div>
+</main>
