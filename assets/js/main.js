@@ -151,7 +151,6 @@ function showWork() {
 class Measurement extends Number {
   constructor(num) {
     super(num);
-    this.decimal = num;
     this.mixed = nearestFraction(num);
   }
 
@@ -203,26 +202,28 @@ class Cabinet {
     this.numDoors = numDoors;
     this.doors = [];
     this.stileRailWidth = new Measurement(stileRailWidth);
+    this.stileRailCount = this.numDoors * 2;
     this.stileRailThickness = new Measurement(stileRailThickness);
     this.panelThickness = new Measurement(panelThickness);
 
     this.totalHeight = new Measurement(this.openingHeight + 2 * this.overlay);
     this.totalWidth = new Measurement(this.openingWidth + 2 * this.overlay);
-    const doorHeight = this.totalHeight;
-    const doorWidth =
-      (this.totalWidth - (this.numDoors - 1) * this.gap) / this.numDoors;
+    this.doorHeight = this.totalHeight;
+    this.doorWidth = new Measurement((this.totalWidth - (this.numDoors - 1) * this.gap) / this.numDoors);
 
-    this.stileHeight = new Measurement(doorHeight);
+    this.stileHeight = new Measurement(this.doorHeight);
     const stile = new StileRail(this.stileRailWidth, this.stileHeight);
-    this.railLength = new Measurement(doorWidth - 2 * stileRailWidth + 0.75); // add tenon length
+    this.railLength = new Measurement(this.doorWidth - 2 * stileRailWidth + 0.75); // add tenon length
     const rail = new StileRail(this.stileRailWidth, this.railLength);
 
     const grooveDepth = 0.375; // 3/8"
+    this.panelOpeningHeight = new Measurement(this.doorHeight - (2 * this.stileRailWidth));
+    this.panelOpeningWidth = new Measurement(this.doorWidth - (2 * this.stileRailWidth));
     this.panelHeight = new Measurement(
-      doorHeight + 2 * grooveDepth - 2 * this.stileRailWidth,
+      this.doorHeight + 2 * grooveDepth - 2 * this.stileRailWidth,
     );
     this.panelWidth = new Measurement(
-      doorWidth + 2 * grooveDepth - 2 * this.stileRailWidth,
+      this.doorWidth + 2 * grooveDepth - 2 * this.stileRailWidth,
     );
     const panel = new Panel(
       this.panelHeight,
@@ -232,7 +233,7 @@ class Cabinet {
 
     // build each Door
     for (let i = 0; i < numDoors; i++) {
-      let newDoor = new Door(i, doorHeight, doorWidth, stile, rail, panel);
+      let newDoor = new Door(i, this.doorHeight, this.doorWidth, stile, rail, panel);
       this.doors.push(newDoor);
     }
   }
@@ -274,82 +275,15 @@ function calculateCutList() {
     panelThickness,
   );
 
-  document.getElementById("cutlist").innerHTML = `
-      <h2 class="heading-2xl">Cut List</h2>
-      <p><strong>Stiles:</strong> ${newCabinet.numDoors * 2} pieces, ${newCabinet.stileRailWidth} x ${newCabinet.stileHeight}</p>
-      <p><strong>Rails:</strong> ${newCabinet.numDoors * 2} pieces, ${stileRailWidth} x ${newCabinet.railLength}</p>
-      <p><strong>Panels:</strong> ${newCabinet.numDoors} pieces, ${newCabinet.panelWidth} x ${newCabinet.panelHeight}</p>
-      <h2 class="heading-2xl">Procedures</h2>
-      <h3 class="heading-xl">Step 1: Cut Materials</h3>
-      <ol class="disc-list">
-          <li>Cut <strong>${newCabinet.numDoors * 2} stiles</strong> to <strong>${newCabinet.stileRailWidth} x ${newCabinet.stileHeight}</strong> from ${newCabinet.stileRailThickness} material.</li>
-          <li>Cut <strong>${newCabinet.numDoors * 2} rails</strong> to <strong>${newCabinet.stileRailWidth} x ${newCabinet.railLength}</strong> from ${newCabinet.stileRailThickness} material.</li>
-          <li>Cut <strong>${newCabinet.numDoors} panels</strong> to <strong>${newCabinet.panelWidth} x ${newCabinet.panelHeight}</strong> from ${newCabinet.panelThickness} material.</li>
-      </ol>
-      <h3 class="heading-xl">Step 2: Cut the Joinery</h3>
-      <h4 class="heading-xl">Grooves for the Panel</h4>
-      <ol class="disc-list">
-          <li>Use a <strong>router with a ${newCabinet.panelThickness} slot cutter</strong> or a <strong>table saw with a dado blade</strong> to cut a <strong>${newCabinet.panelThickness} wide groove, 3/8" deep</strong> along the inside edges of all stiles and rails.</li>
-          <li>The panel will slide into this groove.</li>
-      </ol>
-      <h4 class="heading-xl">Tenons on the Rails</h4>
-      <ol class="disc-list">
-          <li>On the <strong>rails</strong>, cut a <strong>tenon (tongue) ${newCabinet.panelThickness} thick and 3/8" long</strong> on each end to fit into the grooves of the stiles.</li>
-          <li>You can do this using a table saw with a dado blade or a router.</li>
-      </ol>
-      <h3 class="heading-xl">Step 3: Dry Fit the Frame</h3>
-      <ol class="disc-list">
-          <li>Test fit the <strong>stiles, rails, and panel</strong> to ensure a snug fit.</li>
-          <li>The panel should fit into the grooves without forcing.</li>
-      </ol>
-      <h3 class="heading-xl">Step 4: Assemble the Door</h3>
-      <ol class="decimal-list">
-          <li>Apply glue to the <strong>tenons of the rails</strong> (avoid getting glue in the panel grooves so the panel can expand/contract).</li>
-          <li>Insert the <strong>panel</strong> into the grooves.</li>
-          <li>Clamp the frame together and <strong>ensure the door is square</strong> by measuring diagonally.</li>
-          <li>Let the glue dry for at least <strong>30 minutes to an hour</strong>.</li>
-      </ol>
-      <h3 class="heading-xl">Step 5: Sand and Finish</h3>
-      <ol class="disc-list">
-          <li>Sand the assembled doors smooth.</li>
-          <li>Slightly round over or chamfer the edges for a softer look.</li>
-          <li>Apply primer and paint or stain and seal.</li>
-      </ol>
-      <button onclick="showWork()" class="btn">Show Calculations</button>
-  `;
+  const cabinetAttributes = Object.keys(newCabinet);
+  for (field of cabinetAttributes) {
+    let templateField = document.getElementsByClassName(field);
+    for (const element of templateField){
+      element.innerHTML = newCabinet[field];
+    }
+  }
+
   document.getElementById("results").style.display = "block";
   document.getElementById("cutlist").style.display = "block";
-
-  document.getElementById("calculations").innerHTML = `
-      <h2 class="heading-2xl">Calculations</h2>
-      <p>Each door will have a ${newCabinet.overlay} overlay on all outer edges and a ${newCabinet.gap} gap between them.</p>
-      <h3 class="heading-xl">Final Door Dimensions:</h3>
-      <p><strong>Total width of both doors: </strong>( ${newCabinet.openingWidth} + ${newCabinet.overlay} + ${newCabinet.overlay} = ${newCabinet.totalWidth} )</p>
-      <p><strong>Each door width: </strong>( (${newCabinet.totalWidth} - ${newCabinet.gap}) / ${numDoors} = ${newCabinet.doors[0].width} )</p>
-      <p><strong>Each door height: </strong>( ${newCabinet.openingHeight} + ${newCabinet.overlay} + ${newCabinet.overlay} = ${newCabinet.doors[0].height} )</p>
-      <hr/>
-      <h3 class="heading-xl">Stiles (Vertical Pieces) - ${newCabinet.numDoors * 2} Pieces</h3>
-      <p><strong>Width: </strong>${newCabinet.stileRailWidth}</p>
-      <p><strong>Length: </strong>${newCabinet.stileHeight}</p>
-      <h3 class="heading-xl">Rails (Horizontal Pieces) - ${newCabinet.numDoors * 2} Pieces</h3>
-      <p><strong>Width: </strong>${newCabinet.stileRailWidth}</p>
-      <p><strong>Length: </strong>${newCabinet.railLength}</p>
-      <p><strong>Final Rail Length Calculation:</strong></p>
-      <p><strong>Frame opening for the panel: </strong>(  ${newCabinet.doors[0].width} - (2 × ${newCabinet.stileRailWidth}) = ${new Measurement(newCabinet.doors[0].width - 2 * newCabinet.stileRailWidth)} )</p>
-      <p>Each tenon extends 3/8" per end, so we add 3/4" to the rail length:</p>
-      <p><strong>Final rail length: </strong>${newCabinet.railLength}</p>
-      <h3 class="heading-xl">Panels (Plywood) - ${newCabinet.numDoors} Pieces</h3>
-      <p><strong>Width: </strong>${newCabinet.panelWidth}</p>
-      <p><strong>Height: </strong>${newCabinet.panelHeight}</p>
-      <p><strong>Width Calculation:</strong></p>
-      <p>The panel fits into a ${newCabinet.panelThickness} wide x 3/8" deep groove on each stile.</p>
-      <p>The visible opening for the panel is ( ${new Measurement(newCabinet.doors[0].width - 2 * newCabinet.stileRailWidth)} ).</p>
-      <p>The panel extends 3/8" into each stile’s groove.</p>
-      <p><strong>Final panel width: </strong>( ${new Measurement(newCabinet.doors[0].width - 2 * newCabinet.stileRailWidth)} + (2 × 3/8") = ${newCabinet.panelWidth} ).</p>
-      <p><strong>Height Calculation:</strong></p>
-      <p>The visible opening for the panel is ( ${newCabinet.doors[0].height} - (2 × ${newCabinet.stileRailWidth}) = ${new Measurement(newCabinet.doors[0].height - 2 * newCabinet.stileRailWidth)} ).</p>
-      <p>The panel extends 3/8" into each rail’s groove.</p>
-      <p><strong>Final panel height: </strong>( ${new Measurement(newCabinet.doors[0].height - 2 * newCabinet.stileRailWidth)} + (2 × 3/8") = ${newCabinet.panelHeight} ).</p>
-  `;
   draw(newCabinet);
 }
