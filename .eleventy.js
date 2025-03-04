@@ -1,27 +1,7 @@
 import { EleventyHtmlBasePlugin } from "@11ty/eleventy";
 
 export default function (eleventyConfig) {
-  // Copy the assets folder to the output
-  /*
-  eleventyConfig.addPassthroughCopy({
-    "./assets/": "/"
-  });
-  */
- eleventyConfig.addPassthroughCopy("./assets/");
-
-  eleventyConfig.addBundle("css");
-  eleventyConfig.addBundle("js");
-
-  /*
-  // Adds the {% css %} paired shortcode
-	eleventyConfig.addBundle("css", {
-		toFileDirectory: "dist",
-	});
-	// Adds the {% js %} paired shortcode
-	eleventyConfig.addBundle("js", {
-		toFileDirectory: "dist",
-	});
-  */
+  eleventyConfig.addPassthroughCopy("./assets/");
 
 	eleventyConfig.addPlugin(EleventyHtmlBasePlugin);
 };
