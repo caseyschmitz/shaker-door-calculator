@@ -3,8 +3,27 @@ layout: layouts/base.njk
 ---
 <main>
     <div class="switcher">
-        {{ content | safe }}
-        {% include "partials/form.njk" %}
+        <div class="form-group">
+            <div class="card">
+                <form onsubmit="event.preventDefault(); calculateCutList();">
+                    <label for="unit">Unit
+                        <select onload="initUnit()" onchange="initUnit()" name="unit" id="unit">
+                            <option value="imperial" selected>Imperial</option>
+                            <option value="metric">Metric</option>
+                        </select>
+                    </label>
+                    <h1 class="title">Shaker Door Calculator</h1>
+                    <div id="imperialForm">
+                    {% include "partials/imperialForm.njk" %}
+                    </div>
+                    <div id="metricForm" style="display: none;">
+                    {% include "partials/metricForm.njk" %}
+                    </div>
+                    <button type="submit" class="btn">Calculate</button>
+                </form>
+            </div>
+        </div>
+
         <div id="results" class="card" style="display: none;">
             <canvas id="canvas">Sorry, can't display the diagram.</canvas>
             {% include "partials/cutlist.njk" %}

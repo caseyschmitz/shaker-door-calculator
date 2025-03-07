@@ -6,7 +6,12 @@ function draw(cabinet = new Cabinet()) {
     canvas.style.height = "30* 590 /rem";
     canvas.width = canvas.offsetWidth;
 
-    const faceframeDim = 2; // arbitrary 2in face frame
+    let faceframeDim;
+    if (cabinet.unit == "imperial"){
+      faceframeDim = 2; // arbitrary 2in face frame
+    } else {
+      faceframeDim = 4; // arbitrary 4cm face frame
+    }
     const boxWidth = 2 * faceframeDim + cabinet.openingWidth;
     const boxHeight = 2 * faceframeDim + cabinet.openingHeight;
 
@@ -18,8 +23,15 @@ function draw(cabinet = new Cabinet()) {
     const gap = cabinet.gap * norm_factor;
     const stileRailWidth = cabinet.stileRailWidth * norm_factor;
 
-    const outerChamferWidth = 0.5 * norm_factor; // 1/2" chamfer detail
-    const innerChamferWidth = 0.25 * norm_factor; // 1/4" chamfer detail
+    let outerChamferWidth, innerChamferWidth;
+    if (cabinet.unit == "imperial") {
+      outerChamferWidth = 0.5 * norm_factor; // arbitrary 1/2" chamfer detail
+      innerChamferWidth = 0.25 * norm_factor; // arbitrary 1/4" chamfer detail
+  
+    } else {
+      outerChamferWidth = 1.3 * norm_factor; // arbitrary 1/2" chamfer detail
+      innerChamferWidth = 0.6 * norm_factor; // arbitrary 1/4" chamfer detail
+    }
 
     let xpos = 0;
     let ypos = 0;
@@ -86,7 +98,12 @@ function draw(cabinet = new Cabinet()) {
       // draw knobs
       let xposKnobCenter = 0;
       const yposKnobCenter = ypos + doorHeight - stileRailWidth * 0.5;
-      const knobRad = stileRailWidth / 4; // arbitrary radius
+      let knobRad;
+      if (cabinet.unit == "imperial") {
+        knobRad = 0.5 * norm_factor; // arbitrary 1in knobs
+      } else {
+        knobRad = 1.3 * norm_factor; // arbitrary 2.6cm knobs
+      }
       if (door.id % 2 == 0) {
         // draw knob in lower right corner of door
         xposKnobCenter = xpos + doorWidth - stileRailWidth * 0.5;
@@ -149,35 +166,47 @@ function showWork() {
 }
 
 class Measurement extends Number {
-  constructor(num) {
+  constructor(unit, num) {
     super(num);
-    this.mixed = nearestFraction(num);
+    this.unit = unit;
+    if (this.unit == "imperial") {
+      this.value = nearestFraction(num);
+    } else {
+      this.value = Math.round(num * 10) / 10;
+    }
   }
 
   toString() {
-    return `${this.mixed}"`;
+    if (this.unit == "imperial") {
+      return `${this.value}"`;
+    } else {
+      return `${this.value} cm`
+    }
   }
 }
 class StileRail {
-  constructor(width, length) {
-    this.width = new Measurement(width);
-    this.length = new Measurement(length);
+  constructor(unit, width, length) {
+    this.unit = unit;
+    this.width = new Measurement(this.unit, width);
+    this.length = new Measurement(this.unit, length);
   }
 }
 
 class Panel {
-  constructor(height, width, thickness) {
-    this.height = new Measurement(height);
-    this.width = new Measurement(width);
-    this.thickness = new Measurement(thickness);
+  constructor(unit, height, width, thickness) {
+    this.unit = unit;
+    this.height = new Measurement(this.unit, height);
+    this.width = new Measurement(this.unit, width);
+    this.thickness = new Measurement(this.unit, thickness);
   }
 }
 
 class Door {
-  constructor(id, height, width, stile, rail, panel) {
+  constructor(id, unit, height, width, stile, rail, panel) {
     this.id = id;
-    this.height = new Measurement(height);
-    this.width = new Measurement(width);
+    this.unit = unit;
+    this.height = new Measurement(this.unit, height);
+    this.width = new Measurement(this.unit, width);
     this.stile = stile;
     this.rail = rail;
     this.panel = panel;
@@ -186,6 +215,7 @@ class Door {
 
 class Cabinet {
   constructor(
+    unit,
     openingHeight,
     openingWidth,
     overlay,
@@ -195,37 +225,46 @@ class Cabinet {
     stileRailThickness,
     panelThickness,
   ) {
-    this.openingHeight = new Measurement(openingHeight);
-    this.openingWidth = new Measurement(openingWidth);
-    this.overlay = new Measurement(overlay);
-    this.gap = new Measurement(gap);
+    this.unit = unit;
+    this.openingHeight = new Measurement(this.unit, openingHeight);
+    this.openingWidth = new Measurement(this.unit, openingWidth);
+    this.overlay = new Measurement(this.unit, overlay);
+    this.gap = new Measurement(this.unit, gap);
     this.numDoors = numDoors;
     this.doors = [];
-    this.stileRailWidth = new Measurement(stileRailWidth);
+    this.stileRailWidth = new Measurement(this.unit, stileRailWidth);
     this.stileRailCount = this.numDoors * 2;
-    this.stileRailThickness = new Measurement(stileRailThickness);
-    this.panelThickness = new Measurement(panelThickness);
+    this.stileRailThickness = new Measurement(this.unit, stileRailThickness);
+    this.panelThickness = new Measurement(this.unit, panelThickness);
 
-    this.totalHeight = new Measurement(this.openingHeight + 2 * this.overlay);
-    this.totalWidth = new Measurement(this.openingWidth + 2 * this.overlay);
+    this.totalHeight = new Measurement(this.unit, this.openingHeight + 2 * this.overlay);
+    this.totalWidth = new Measurement(this.unit, this.openingWidth + 2 * this.overlay);
     this.doorHeight = this.totalHeight;
-    this.doorWidth = new Measurement((this.totalWidth - (this.numDoors - 1) * this.gap) / this.numDoors);
+    this.doorWidth = new Measurement(this.unit, (this.totalWidth - (this.numDoors - 1) * this.gap) / this.numDoors);
 
-    this.stileHeight = new Measurement(this.doorHeight);
-    const stile = new StileRail(this.stileRailWidth, this.stileHeight);
-    this.railLength = new Measurement(this.doorWidth - 2 * stileRailWidth + 0.75); // add tenon length
-    const rail = new StileRail(this.stileRailWidth, this.railLength);
+    if (this.unit == 'imperial') {
+      this.tenonLength = new Measurement(this.unit, 0.375);
+      this.grooveDepth = new Measurement(this.unit, 0.375);
+    } else {
+      this.tenonLength = new Measurement(this.unit, 1);
+      this.grooveDepth = new Measurement(this.unit, 1);
+    }
 
-    const grooveDepth = 0.375; // 3/8"
-    this.panelOpeningHeight = new Measurement(this.doorHeight - (2 * this.stileRailWidth));
-    this.panelOpeningWidth = new Measurement(this.doorWidth - (2 * this.stileRailWidth));
-    this.panelHeight = new Measurement(
-      this.doorHeight + 2 * grooveDepth - 2 * this.stileRailWidth,
+    this.stileHeight = new Measurement(this.unit, this.doorHeight);
+    const stile = new StileRail(this.unit, this.stileRailWidth, this.stileHeight);
+    this.railLength = new Measurement(this.unit, this.doorWidth - (2 * stileRailWidth) + (2 * this.tenonLength)); // add tenon length
+    const rail = new StileRail(this.unit, this.stileRailWidth, this.railLength);
+
+    this.panelOpeningHeight = new Measurement(this.unit, this.doorHeight - (2 * this.stileRailWidth));
+    this.panelOpeningWidth = new Measurement(this.unit, this.doorWidth - (2 * this.stileRailWidth));
+    this.panelHeight = new Measurement(this.unit, 
+      this.doorHeight + 2 * this.grooveDepth - 2 * this.stileRailWidth,
     );
-    this.panelWidth = new Measurement(
-      this.doorWidth + 2 * grooveDepth - 2 * this.stileRailWidth,
+    this.panelWidth = new Measurement(this.unit, 
+      this.doorWidth + 2 * this.grooveDepth - 2 * this.stileRailWidth,
     );
     const panel = new Panel(
+      this.unit,
       this.panelHeight,
       this.panelWidth,
       this.panelThickness,
@@ -233,7 +272,7 @@ class Cabinet {
 
     // build each Door
     for (let i = 0; i < numDoors; i++) {
-      let newDoor = new Door(i, this.doorHeight, this.doorWidth, stile, rail, panel);
+      let newDoor = new Door(i, this.unit, this.doorHeight, this.doorWidth, stile, rail, panel);
       this.doors.push(newDoor);
     }
   }
@@ -244,27 +283,25 @@ class Cabinet {
 }
 
 function calculateCutList() {
-  const numDoors = parseInt(document.getElementById("numDoors").value);
-  const openingWidth = parseFloat(
-    document.getElementById("openingWidth").value,
-  );
-  const openingHeight = parseFloat(
-    document.getElementById("openingHeight").value,
-  );
-  const stileRailWidth = parseFloat(
-    document.getElementById("stileRailWidth").value,
-  );
-  const overlay = parseFloat(document.getElementById("overlay").value);
-  const gap =
-    numDoors > 1 ? parseFloat(document.getElementById("gap").value) : 0;
-  const stileRailThickness = parseFloat(
-    document.getElementById("stileRailThickness").value,
-  );
-  const panelThickness = parseFloat(
-    document.getElementById("panelThickness").value,
-  );
+  const unit = document.getElementById("unit").value;
+  let form;
+  if (unit == "imperial"){
+    form = document.getElementById("imperialForm").children;
+  } else {
+    form = document.getElementById("metricForm").children;
+  }
+
+  const numDoors = parseInt(form.namedItem("numDoors").value);
+  const openingWidth = parseFloat(form.namedItem('openingWidth').value);
+  const openingHeight = parseFloat(form.namedItem("openingHeight").value);
+  const stileRailWidth = parseFloat(form.namedItem("stileRailWidth").value);
+  const overlay = parseFloat(form.namedItem("overlay").value);
+  const gap = numDoors > 1 ? parseFloat(form.namedItem("gap").value) : 0;
+  const stileRailThickness = parseFloat(form.namedItem("stileRailThickness").value);
+  const panelThickness = parseFloat(form.namedItem("panelThickness").value);
 
   const newCabinet = new Cabinet(
+    unit,
     openingHeight,
     openingWidth,
     overlay,
@@ -286,4 +323,16 @@ function calculateCutList() {
   document.getElementById("results").style.display = "block";
   document.getElementById("cutlist").style.display = "block";
   draw(newCabinet);
+}
+
+function initUnit(){
+  const unit = document.getElementById("unit").value;
+  console.log(unit);
+  if (unit == "imperial"){
+    document.getElementById("metricForm").style.display = "none";
+    document.getElementById("imperialForm").style.display = "block";
+  } else {
+    document.getElementById("imperialForm").style.display = "none";
+    document.getElementById("metricForm").style.display = "block";
+  }
 }
